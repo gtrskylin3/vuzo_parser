@@ -4,21 +4,24 @@ from aiogram.fsm.context import FSMContext
 from aiogram.filters import Command
 from format import vuz_stats
 from states import Form
+from sqlalchemy.ext.asyncio import AsyncSession
 from keyboards.inline import get_universities_keyboard, get_add_competition_keyboard
 from vuz_parser import VUZ_PARSER
-
+from repository.users import  UsersRepository
 router = Router()
 
 UNIVERSITIES = ["НГУ", "НГТУ НЭТИ", "ТГУ"]
 
 @router.message(Command("start"))
-async def command_start(message: Message, state: FSMContext):
+async def command_start(message: Message, state: FSMContext, user_repo: UsersRepository,):
     await state.clear()
+    await user_repo.get_user(message.from_user.id)
     await message.answer("Введите свой код, по которому можно отследить позицию в конкурсе")
     await state.set_state(Form.waiting_for_code)
 
 @router.message(Form.waiting_for_code)
-async def process_code(message: Message, state: FSMContext):
+async def process_code(message: Message, state: FSMContext, user_repo: UsersRepository):
+    user = await user_repo.update_user_code(message.from_user.id, message.text)
     await state.update_data(user_code=message.text, competitions=[])
     await message.answer(
         "Выберите Вуз:",

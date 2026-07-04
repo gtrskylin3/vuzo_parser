@@ -1,12 +1,15 @@
-from typing import List
+from typing import List, TYPE_CHECKING
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey
-
 from models.base import Base
+
+if TYPE_CHECKING:
+    from models import Users, Universities
 
 class UniversitiesDirections(Base):
     __tablename__ = 'universities_directions'
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_position: Mapped[int] = mapped_column()
     name: Mapped[str]
     url: Mapped[str]
