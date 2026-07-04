@@ -20,12 +20,12 @@ def format_nsu_answer(user_code, competition_url):
             type=type
         )
         if nsu_data:
-            faculty_name, total_places, kvota, abiturient_number, people_with_consent = nsu_data
+            faculty_name, total_places, kvota, position, people_with_consent = nsu_data
             result_message += (
                 f"Ваша статистика в конкурсе этого направления ({faculty_name}):\n"
                 f"Всего мест: {total_places}\n"
                 f"Квота: {kvota}\n"
-                f"Ваш номер: {abiturient_number}\n"
+                f"Ваш номер: {position}\n"
                 f"Человек с согласием: {people_with_consent}\n"
             )
         else:
@@ -34,7 +34,9 @@ def format_nsu_answer(user_code, competition_url):
         result_message += f"Ошибка парсинга параметров для НГУ: {e}. Убедитесь, что ссылка корректна.\n"
     except Exception as e:
         result_message += f"Произошла ошибка при получении данных для НГУ: {e}\n"
-    return result_message
+    if not position:
+        position = None
+    return result_message, position
 
 
 def format_nstu_answer(user_code, competition_url):
@@ -52,4 +54,6 @@ def format_nstu_answer(user_code, competition_url):
             result_message += "Не удалось получить данные для НГТУ по этой ссылке.\n"
     except Exception as e:
         result_message += f"Произошла ошибка при получении данных для НГТУ: {e}\n"
-    return result_message
+    if not position:
+        position = None
+    return result_message, position

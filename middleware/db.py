@@ -3,6 +3,7 @@ from aiogram import BaseMiddleware
 from aiogram.types import Message, TelegramObject
 from sqlalchemy.ext.asyncio.session import async_sessionmaker
 from repository.users import UsersRepository
+from repository.universities import UniversitiesRepository
 
 class DataBaseSession(BaseMiddleware):
     def __init__(self, session_pool: async_sessionmaker):
@@ -15,5 +16,6 @@ class DataBaseSession(BaseMiddleware):
     ) -> Any:  
         async with self.session_pool() as session:
             data['user_repo'] = UsersRepository(session)
+            data['univer_repo'] = UniversitiesRepository(session)
             return await handler(event, data)
-        
+            
