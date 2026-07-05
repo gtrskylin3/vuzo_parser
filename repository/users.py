@@ -1,4 +1,7 @@
 from sqlalchemy import func, select
+from sqlalchemy.orm import joinedload
+
+from models.universities_directions import UniversitiesDirections
 from .base import BaseRepository
 from models import Users, UserDirections
 
@@ -26,21 +29,35 @@ class UsersRepository(BaseRepository):
         result = await self.session.execute(query)
         return result.scalar() or 0
 
-    async def add_direction(self, user_id: int, direction_id: int) -> bool:
+    async def add_direction(self, user_id: int, direction_id: int, position: int):
         current_count = await self.get_user_directions_count(user_id)
-        if current_count >= 5:
-            return False  
         query = select(UserDirections).where(
             UserDirections.user_id == user_id, 
             UserDirections.direction_id == direction_id
         )
-        exists = await self.session.execute(query)
-        if exists.scalar_one_or_none():
-            return True 
-        new_link = UserDirections(user_id=user_id, direction_id=direction_id)
+        result = await self.session.execute(query)
+        user_direction = result.scalar_one_or_none()
+        if user_direction:
+            old_position = user_direction.user_position
+            if old_position != position:
+                user_direction.user_position = position
+                await self.session.commit()     
+            return True, old_position
+        if current_count >= 5:
+            return False, None  
+        new_link = UserDirections(user_id=user_id, direction_id=direction_id, user_position=position)
         self.session.add(new_link)
         await self.session.commit()
-        return True
+        return True, None
 
-    async def get_all_directions(self):
-        pass
+    async def get_all_tracked_directions(self):
+        stmt = (select(UserDirections)
+                .options(joinedload(UserDirections.user),
+                joinedload(UserDirections.direction).joinedload(UniversitiesDirections.university)
+            )
+        )
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+    
+
+    

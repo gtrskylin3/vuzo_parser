@@ -10,7 +10,6 @@ if TYPE_CHECKING:
 class UniversitiesDirections(Base):
     __tablename__ = 'universities_directions'
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    user_position: Mapped[int] = mapped_column()
     name: Mapped[str]
     url: Mapped[str]
     university_id: Mapped[int] = mapped_column(ForeignKey('universities.id', ondelete='CASCADE'))

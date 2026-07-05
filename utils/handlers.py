@@ -37,7 +37,7 @@ async def update_and_respond_direction(
         # Если пришли из текстового ввода: берем название из стейта, а ссылку из сообщения
         direction_name = user_data.get("direction_name")
         direction_url = event.text  # так как event — это Message
-
+    print(user_id, user_code, selected_university, direction_name, direction_url)
     # Валидация данных
     if not all([user_id, user_code, selected_university, direction_name, direction_url]):
         await get_error(target_msg, state)
@@ -59,26 +59,33 @@ async def update_and_respond_direction(
 
     # 4. Работа с базой данных
     vuz = await univer_repo.get_or_create_vuz(selected_university)
-    
-    direction, old_position = await univer_repo.get_or_create_user_direction(
+
+    # Шаг 1: Получаем или создаем общее, не привязанное к юзеру направление
+    direction = await univer_repo.get_or_create_direction(
         vuz_id=vuz.id,
-        position=position,
         direction_name=direction_name,
         direction_url=direction_url,
-        user_id=user_id
     )
-    
-    is_linked = await user_repo.add_direction(user_id, direction.id)
+
+    # Шаг 2: Привязываем направление к пользователю и обновляем его позицию
+    is_linked, old_position = await user_repo.add_direction(
+        user_id=user_id,
+        direction_id=direction.id,
+        position=position  # Передаем позицию из парсера!
+    )
+
     if not is_linked:
         await target_msg.answer("❌ Вы не можете добавить более 5 направлений!")
         return
-    
-    if position != old_position:
-        target_msg.answer(
-            (f"Ваша позиция в конкурсе **{direction_name}** изменилась\n"
-            f"Было: {old_position}\n\n"
-            f"Стало: {position}\n\n"
-            ))
+
+    if old_position and (int(position) != old_position):
+        await target_msg.answer(
+            (f"🔥 Ваша позиция в конкурсе **{direction_name}** изменилась!\n"
+             f"Было: {old_position}\n"
+             f"Стало: {position}"), 
+             parse_mode="Markdown"
+        )
+
     # 5. Возврат к меню
     await target_msg.answer(
         "Выберите Вуз:", reply_markup=get_universities_keyboard(UNIVERSITIES)

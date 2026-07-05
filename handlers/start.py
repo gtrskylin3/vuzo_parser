@@ -119,8 +119,12 @@ async def start_dialog(
 ):
     await state.clear()
     user = await user_repo.get_or_create_user(callback.from_user.id)
+    data = await state.get_data()
+    if not data.get('user_id'):
+        await state.update_data(user_id=user.id)
     if user.user_code:
-        await state.update_data(user_code=user.user_code, user_id=user.id)
+        if not data.get('user_code'):
+            await state.update_data(user_code=user.user_code)
         await callback.message.answer(
             "Выберите Вуз:", reply_markup=get_universities_keyboard(UNIVERSITIES)
         )
