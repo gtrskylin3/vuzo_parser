@@ -7,3 +7,4 @@ class Form(StatesGroup):
     waiting_for_direction_name = State()
     waiting_for_url = State()
     viewing_university = State()
+    updating_code = State()

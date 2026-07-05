@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from models.user_directions import UserDirections
 from models.users import Users
@@ -75,3 +75,27 @@ class UniversitiesRepository(BaseRepository):
         )
         result = await self.session.execute(query)
         return result.scalars().all()
+
+    async def get_user_stats(self, user_id: int):
+        """
+        Возвращает статистику по добавленным пользователем направлениям в разрезе ВУЗов.
+        :param user_id: ID пользователя
+        :return: (общее количество вузов, словарь {название_вуза: количество_направлений})
+        """
+        stmt = (
+            select(
+                Universities.name,
+                func.count(UniversitiesDirections.id).label("directions_count"),
+            )
+            .join(UniversitiesDirections)
+            .join(UserDirections)
+            .where(UserDirections.user_id == user_id)
+            .group_by(Universities.name)
+        )
+        result = await self.session.execute(stmt)
+        rows = result.all()
+
+        vuz_stats = {name: count for name, count in rows}
+        total_vuz_count = len(vuz_stats)
+
+        return total_vuz_count, vuz_stats

@@ -6,6 +6,7 @@ def get_universities_keyboard(universities):
     builder = InlineKeyboardBuilder()
     for university in universities:
         builder.add(InlineKeyboardButton(text=university, callback_data=f"uni:{university}"))
+    builder.add(InlineKeyboardButton(text="Назад", callback_data=f"back_menu"))
     builder.adjust(1)
     return builder.as_markup()
 
@@ -15,13 +16,21 @@ def get_add_competition_keyboard(directions: list[UniversitiesDirections], unive
         builder.add(InlineKeyboardButton(text=f"{direction.name}", callback_data=f"view_dir:{direction.id}"))
     if len(directions) < 5:
         builder.add(InlineKeyboardButton(text="Добавить конкурс", callback_data=f"add_comp:{university_name}"))
+    builder.add(InlineKeyboardButton(text="Назад", callback_data=f"back_menu"))
     builder.adjust(1)
     return builder.as_markup()
 
 def get_start_keyboard():
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🔑 Регистрация", callback_data="start_registration")],
+        [InlineKeyboardButton(text="🏘️ Начать", callback_data="start_registration")],
         [InlineKeyboardButton(text="👨‍🎓 Мой профиль", callback_data="my_profile")],
-        [InlineKeyboardButton(text="🏘️ Доступные ВУЗЫ", callback_data="view_vuz")],
+
     ])
     return keyboard
+
+def get_profile_keyboard():
+    builder = InlineKeyboardBuilder()
+    builder.add(InlineKeyboardButton(text="Изменить код", callback_data="update_code"))
+    builder.add(InlineKeyboardButton(text="Назад", callback_data="start_registration"))
+    builder.adjust(1)
+    return builder.as_markup()
