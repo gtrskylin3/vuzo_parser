@@ -1,10 +1,14 @@
 from sqlalchemy import select
+
+from models.user_directions import UserDirections
+from models.users import Users
 from .base import BaseRepository
 from models import Universities, UniversitiesDirections
 
+
 class UniversitiesRepository(BaseRepository):
     async def get_or_create_vuz(self, name):
-        stmt = select(Universities).where(Universities.name==name)
+        stmt = select(Universities).where(Universities.name == name)
         result = await self.session.execute(stmt)
         university = result.scalar_one_or_none()
         if university:
@@ -14,23 +18,60 @@ class UniversitiesRepository(BaseRepository):
         await self.session.commit()
         await self.session.refresh(university)
         return university
-    
-    async def get_or_create_direction(self, vuz_id: int, position: int, direction_name: str, direction_url: str) -> UniversitiesDirections:
+
+    async def get_direction_by_id(self, direction_id: int) -> UniversitiesDirections | None :
         stmt = select(UniversitiesDirections).where(
-            UniversitiesDirections.university_id == vuz_id,
-            UniversitiesDirections.name == direction_name,
-            UniversitiesDirections.user_position == position,
-            UniversitiesDirections.url == direction_url
+            UniversitiesDirections.id == direction_id 
         )
         result = await self.session.execute(stmt)
         direction = result.scalar_one_or_none()
         if direction:
             return direction
-        direction = UniversitiesDirections(university_id=vuz_id, user_position = position, name=direction_name, url=direction_url)
-        self.session.add(direction)
+
+    async def get_or_create_user_direction(
+        self,
+        vuz_id: int,
+        position: int,
+        direction_name: str,
+        direction_url: str,
+        user_id: int,
+    ):
+        stmt = (
+            select(UniversitiesDirections)
+            .join(UserDirections)  # Соединяем с таблицей связей
+            .join(Users)  # Соединяем с пользователями
+            .where(
+                UniversitiesDirections.university_id == vuz_id,
+                UniversitiesDirections.name == direction_name,
+                Users.id == user_id,  # Фильтр по конкретному юзеру!
+            )
+        )
+        result = await self.session.execute(stmt)
+        direction = result.scalar_one_or_none()
+        old_position = None
+        if direction:
+            old_position = direction.user_position
+            direction.user_position = position
+            direction.url = direction_url
+        else:
+            direction = UniversitiesDirections(
+                university_id=vuz_id,
+                user_position=position,
+                name=direction_name,
+                url=direction_url,
+            )
+            self.session.add(direction)
         await self.session.commit()
         await self.session.refresh(direction)
-        return direction
-    
-    
-    
+        return direction, old_position
+
+    async def get_user_directions_by_vuz(self, user_id: int, vuz_name: str):
+        query = (
+            select(UniversitiesDirections)
+            .join(Universities)
+            .join(UserDirections)
+            .join(Users)
+            .where(Universities.name == vuz_name, Users.id == user_id)
+        )
+        result = await self.session.execute(query)
+        return result.scalars().all()

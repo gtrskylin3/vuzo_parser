@@ -18,6 +18,21 @@ async def main() -> None:
     dp = Dispatcher(storage=storage)
     dp.update.middleware(DataBaseSession(session_pool=session_maker))
     await create_db()
+    text = (
+        "🤖 Привет! Я VUZOPARSER — твой помощник в пору поступления.\n\n"
+        "Я избавлю тебя от бесконечного обновления сайтов приемных комиссий. "
+        "Добавь свои направления, и я буду автоматически отслеживать твое место в конкурсных списках, "
+        "а также пришлю уведомление, если ситуация изменится!\n\n"
+        "📈 Что я умею:\n"
+        "• Мониторить твою позицию 24/7.\n"
+        "• Учитывать приоритеты и оригиналы.\n"
+        "• Присылать моментальные уведомления.\n\n"
+        "🏛 Доступные ВУЗы: /vuz_list\n\n"
+        "Нажми /start, чтобы начать!"
+    )
+    
+    # Устанавливаем описание
+    await bot.set_my_description(text)
     await bot.delete_webhook(drop_pending_updates=True)
     # Include routers
     dp.include_router(start.router)

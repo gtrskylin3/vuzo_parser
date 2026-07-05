@@ -11,7 +11,7 @@ def format_nsu_answer(user_code, competition_url):
         direction = int(query_params.get('direction', ['6'])[0])
         condition = int(query_params.get('condition', ['10'])[0])
         type = int(query_params.get('type', ['0'])[0])
-
+        position = None
         nsu_data = VUZ_PARSER.get_NSU(
             id=user_code,
             faculty=faculty,
@@ -34,8 +34,6 @@ def format_nsu_answer(user_code, competition_url):
         result_message += f"Ошибка парсинга параметров для НГУ: {e}. Убедитесь, что ссылка корректна.\n"
     except Exception as e:
         result_message += f"Произошла ошибка при получении данных для НГУ: {e}\n"
-    if not position:
-        position = None
     return result_message, position
 
 
