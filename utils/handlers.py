@@ -8,7 +8,7 @@ from config import UNIVERSITIES
 from states import Form
 
 async def update_and_respond_direction(
-    event: Message,
+    event: Message | CallbackQuery, # Теперь может принимать CallbackQuery, как и command_start
     univer_repo: UniversitiesRepository,
     user_repo: UsersRepository,
     state: FSMContext,
@@ -29,7 +29,7 @@ async def update_and_respond_direction(
         # Если пришли из кнопки: берем всё из БД по ID направления
         direction_obj = await univer_repo.get_direction_by_id(direction_id)
         if not direction_obj:
-            await target_msg.answer("Ошибка: направление не найдено в базе.")
+            await target_msg.answer("❌ Ошибка: направление не найдено в базе.")
             return
         direction_name = direction_obj.name
         direction_url = direction_obj.url
@@ -37,6 +37,7 @@ async def update_and_respond_direction(
         # Если пришли из текстового ввода: берем название из стейта, а ссылку из сообщения
         direction_name = user_data.get("direction_name")
         direction_url = event.text  # так как event — это Message
+
     # Валидация данных
     if not all([user_id, user_code, selected_university, direction_name, direction_url]):
         await get_error(target_msg, state)
@@ -84,10 +85,9 @@ async def update_and_respond_direction(
              f"Стало: {position}"), 
              parse_mode="Markdown"
         )
-
     # 5. Возврат к меню
     await target_msg.answer(
-        "Выберите Вуз:", reply_markup=get_universities_keyboard(UNIVERSITIES)
+        "✅ Направление *добавлено* в отслеживание! Выберите ВУЗ:", parse_mode="Markdown", reply_markup=get_universities_keyboard(UNIVERSITIES)
     )
     await state.set_state(Form.waiting_for_university)
 

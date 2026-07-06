@@ -21,7 +21,7 @@ async def on_startup(bot: Bot, session_pool: async_sessionmaker):
     scheduler.add_job(
         broadcast_users_job,
         trigger="interval",
-        minutes=15,
+        minutes=settings.NOTIFICATION_TIME,
         kwargs={"bot": bot, "session_pool": session_pool},
     )
     scheduler.start()

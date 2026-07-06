@@ -30,8 +30,15 @@ async def command_start(event: Message | CallbackQuery):
         callback = True
     await message.answer_photo(
         photo=FSInputFile(BASE_DIR / "icon.png"),
-        caption="""Привет! Я бот для отслеживания твоей позиции в конкурсных списках ВУЗа.
-Я умею работать со списками, где есть твой уникальный код.""",
+        caption="""👋 Привет! Я *VUZOPARSER* — твой незаменимый помощник в пору поступления.
+
+Я избавлю тебя от бесконечного обновления сайтов приемных комиссий. Добавь свои направления, и я буду *автоматически отслеживать* твое место в конкурсных списках, а также пришлю уведомление, если ситуация изменится! 🔔
+
+✨ **Что я умею:**
+• Мониторить твою позицию 24/7.
+• Учитывать приоритеты и оригиналы.
+• Присылать моментальные уведомления.
+""",
         parse_mode="Markdown",
         reply_markup=get_start_keyboard(),
     )
@@ -48,7 +55,7 @@ async def my_profile(
     user = await user_repo.get_or_create_user(callback.from_user.id)
     if not user.user_code:
         await callback.message.answer(
-            "Вы еще не зарегистрированы. Введите свой код, по которому можно отследить позицию в конкурсе:"
+            "⚠️ Вы еще не зарегистрированы. Пожалуйста, введите свой код, по которому можно отследить позицию в конкурсе:"
         )
         await state.set_state(Form.waiting_for_code)
         await callback.answer()
@@ -57,15 +64,17 @@ async def my_profile(
     total_vuz, vuz_stats = await univer_repo.get_user_stats(user.id)
 
     stats_lines = [
-        f"— Вуз: {vuz_name}, направлений: {count}/5"
+        f" • *{vuz_name}*: {count}/5 направлений"
         for vuz_name, count in vuz_stats.items()
     ]
-    stats_str = "\n".join(stats_lines)
+    stats_str = "\n".join(stats_lines) if stats_lines else "Пока не добавлено ни одного направления."
 
     await callback.message.answer(
-        f"""**Ваш профиль**
-**Ваш код:** `{user.user_code}`
-**Добавлено ВУЗов:** {total_vuz}
+        f"""👤 **Ваш профиль**
+
+🔑 **Ваш код:** `{user.user_code}`
+
+🏛️ **Статистика направлений:**
 {stats_str}
 """,
         reply_markup=get_profile_keyboard(),
@@ -76,7 +85,7 @@ async def my_profile(
 
 @router.callback_query(F.data == "update_code")
 async def update_code(callback: CallbackQuery, state: FSMContext):
-    await callback.message.answer("Введите новый код")
+    await callback.message.answer("✏️ Введите свой *новый* код для отслеживания:")
     await state.set_state(Form.updating_code)
     await callback.answer()
 
@@ -93,16 +102,19 @@ async def process_updating_code(
     total_vuz, vuz_stats = await univer_repo.get_user_stats(user.id)
 
     stats_lines = [
-        f"— Вуз: {vuz_name}, направлений: {count}/5"
+        f" • *{vuz_name}*: {count}/5 направлений"
         for vuz_name, count in vuz_stats.items()
     ]
-    stats_str = "\n".join(stats_lines)
-    await message.answer(
-        f"""Ваш код успешно обновлен!
+    stats_str = "\n".join(stats_lines) if stats_lines else "Пока не добавлено ни одного направления."
 
-**Ваш профиль**
-**Ваш код:** `{user.user_code}`
-**Добавлено ВУЗов:** {total_vuz}
+    await message.answer(
+        f"""✅ Ваш код успешно обновлен!
+
+👤 **Ваш профиль**
+
+🔑 **Ваш код:** `{user.user_code}`
+
+🏛️ **Статистика направлений:**
 {stats_str}
 """,
         reply_markup=get_profile_keyboard(),
@@ -126,12 +138,12 @@ async def start_dialog(
         if not data.get('user_code'):
             await state.update_data(user_code=user.user_code)
         await callback.message.answer(
-            "Выберите Вуз:", reply_markup=get_universities_keyboard(UNIVERSITIES)
+            "🎓 Выберите ВУЗ для отслеживания позиций:", reply_markup=get_universities_keyboard(UNIVERSITIES)
         )
         await state.set_state(Form.waiting_for_university)
     else:
         await callback.message.answer(
-            "Введите свой код, по которому можно отследить позицию в конкурсе"
+            "🔑 Введите свой *уникальный код* (СНИЛС, номер студенческого и т.п.), по которому можно отследить позицию в конкурсе:", parse_mode="Markdown"
         )
         await state.set_state(Form.waiting_for_code)
     await callback.answer()
@@ -142,7 +154,7 @@ async def process_code(message: Message, state: FSMContext, user_repo: UsersRepo
     user = await user_repo.update_user_code(message.from_user.id, message.text)
     await state.update_data(user_code=message.text)
     await message.answer(
-        "Выберите Вуз:", reply_markup=get_universities_keyboard(UNIVERSITIES)
+        "✅ Ваш код успешно сохранен! Теперь выберите ВУЗ для отслеживания позиций:", reply_markup=get_universities_keyboard(UNIVERSITIES)
     )
     await state.set_state(Form.waiting_for_university)
 
@@ -162,15 +174,16 @@ async def process_university_selection(
         user_id=user_id, vuz_name=university
     )
     await callback.message.edit_text(
-        f"Выбран Вуз: {university}",
+        f"🏛️ Вы выбрали ВУЗ: *{university}*.\n\nВаши отслеживаемые направления:",
         reply_markup=get_add_competition_keyboard(directions, university),
+        parse_mode="Markdown"
     )
     await callback.answer()
 
 
 @router.callback_query(F.data.startswith("add_comp:"))
 async def process_add_competition(callback: CallbackQuery, state: FSMContext):
-    await callback.message.answer("Введите название направления:")
+    await callback.message.answer("📝 Введите *название* направления, которое хотите отслеживать (например, 'Информатика'):", parse_mode="Markdown")
     await state.set_state(Form.waiting_for_direction_name)
     await callback.answer()
 
@@ -178,7 +191,7 @@ async def process_add_competition(callback: CallbackQuery, state: FSMContext):
 @router.message(Form.waiting_for_direction_name)
 async def process_directions_name(message: Message, state: FSMContext):
     await state.update_data(direction_name=message.text)
-    await message.answer("Введите ссылку на интересующий вас конкурс")
+    await message.answer("🔗 Отлично! Теперь отправьте *полную ссылку* на страницу конкурсного списка для этого направления:", parse_mode="Markdown")
     await state.set_state(Form.waiting_for_url)
 
 

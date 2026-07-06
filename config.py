@@ -11,5 +11,6 @@ class Settings(BaseSettings):
     BOT_TOKEN: str
     PROXY_TG: str
     DB_URL: str = DB_URL
+    NOTIFICATION_TIME: int = 10
     
 settings = Settings()
