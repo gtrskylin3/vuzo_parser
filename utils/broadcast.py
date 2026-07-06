@@ -45,8 +45,11 @@ async def broadcast_users(bot: Bot, user_repo: UsersRepository):
             try:
                 await bot.send_message(
                     chat_id=chat_id,
-                    text=(f"🔥 Ваша позиция в конкурсе **{user_direction.direction.name}** изменилась!"
-                          f"Было: {old_position or 'N/A'} -> Стало: {position}"),
+                    text=("📢 Ваша позиция в конкурсе изменилась:\n"
+                          f"Конкурс: **{user_direction.direction.name}**\n"
+                          f"URL: **{user_direction.direction.url}**\n"
+                          f"Было: {old_position or 'N/A'}\n"
+                          f"Стало: {position}"),
                     parse_mode="Markdown"
                 )
                 user_direction.user_position = int(position)

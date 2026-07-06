@@ -7,6 +7,7 @@ from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.fsm.storage.memory import MemoryStorage
 from config import settings
 from handlers import start
+from middleware.access import AccessMiddleware
 from middleware.db import DataBaseSession
 from middleware.logging import LoggingMiddleware # Импортируем middleware
 from database.db import create_db, session_maker
@@ -39,8 +40,9 @@ async def main() -> None:
     dp = Dispatcher(storage=storage)
     
     # Register middleware
+    dp.update.middleware(AccessMiddleware(allowed_id=6391362410)) # Первым проверяем доступ
     dp.update.middleware(DataBaseSession(session_pool=session_maker))
-    dp.update.middleware(LoggingMiddleware()) # Регистрируем логирование
+    dp.update.middleware(LoggingMiddleware()) # Логирование - последним
     
     # Register startup hooks
     dp.startup.register(on_startup)
