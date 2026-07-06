@@ -10,7 +10,6 @@ from .handlers import get_error
 
 async def broadcast_users(bot: Bot, user_repo: UsersRepository):
     all_directions = await user_repo.get_all_tracked_directions()
-    has_changes = False 
     for user_direction in all_directions:
         chat_id = user_direction.user.tg_id
         univer = user_direction.direction.university
@@ -32,15 +31,12 @@ async def broadcast_users(bot: Bot, user_repo: UsersRepository):
                     parse_mode="Markdown"
                 )
                 user_direction.user_position = int(position)
-                has_changes = True
                 await asyncio.sleep(0.05) 
-                await user_repo.session.commit()
             except TelegramAPIError as e:
                 # Если пользователь заблокировал бота, код не упадет, а пойдет дальше
                 print(f"Не удалось отправить сообщение {chat_id}: {e}")
                 continue
-    if has_changes:
-        await user_repo.session.commit()
+    await user_repo.session.commit()
 
 async def broadcast_users_job(bot: Bot, session_pool: async_sessionmaker):
     async with session_pool() as session:
