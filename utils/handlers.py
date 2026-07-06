@@ -37,7 +37,6 @@ async def update_and_respond_direction(
         # Если пришли из текстового ввода: берем название из стейта, а ссылку из сообщения
         direction_name = user_data.get("direction_name")
         direction_url = event.text  # так как event — это Message
-    print(user_id, user_code, selected_university, direction_name, direction_url)
     # Валидация данных
     if not all([user_id, user_code, selected_university, direction_name, direction_url]):
         await get_error(target_msg, state)
