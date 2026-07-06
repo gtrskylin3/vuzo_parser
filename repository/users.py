@@ -50,14 +50,14 @@ class UsersRepository(BaseRepository):
         await self.session.commit()
         return True, None
 
-    async def get_all_tracked_directions(self):
+    async def get_all_tracked_directions(self) -> list[UserDirections]:
         stmt = (select(UserDirections)
                 .options(joinedload(UserDirections.user),
                 joinedload(UserDirections.direction).joinedload(UniversitiesDirections.university)
             )
         )
         result = await self.session.execute(stmt)
-        return result.scalars().all()
+        return list(result.scalars().all())
     
 
     

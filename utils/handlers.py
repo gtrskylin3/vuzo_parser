@@ -71,7 +71,7 @@ async def update_and_respond_direction(
     is_linked, old_position = await user_repo.add_direction(
         user_id=user_id,
         direction_id=direction.id,
-        position=position  # Передаем позицию из парсера!
+        position=int(position)  # Передаем позицию из парсера!
     )
 
     if not is_linked:
@@ -93,7 +93,7 @@ async def update_and_respond_direction(
     await state.set_state(Form.waiting_for_university)
 
 
-async def get_error(message: Message, state: FSMContext):
+async def get_error(message: Message, state: FSMContext | None):
     await message.answer("Произошла ошибка. Пожалуйста, начните сначала с /start.")
-    await state.clear()
-    return
+    if state:
+        await state.clear()
