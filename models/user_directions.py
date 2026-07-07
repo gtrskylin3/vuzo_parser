@@ -12,6 +12,7 @@ class UserDirections(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), primary_key=True)
     direction_id: Mapped[int] = mapped_column(ForeignKey('universities_directions.id', ondelete='CASCADE'), primary_key=True)
     user_position: Mapped[int | None] = mapped_column(nullable=True)
+    user_code: Mapped[int | None] = mapped_column(nullable=True)
 
     # Связи, которые "смотрят" из этой таблицы на другие
     user: Mapped["Users"] = relationship(back_populates="directions_links")

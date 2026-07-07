@@ -8,3 +8,5 @@ class Form(StatesGroup):
     waiting_for_url = State()
     viewing_university = State()
     updating_code = State()
+    waiting_for_custom_code_choice = State()
+    waiting_for_custom_code = State()

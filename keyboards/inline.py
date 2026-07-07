@@ -16,7 +16,7 @@ def get_add_competition_keyboard(directions: list[UniversitiesDirections], unive
         builder.add(InlineKeyboardButton(text=f"{direction.name}", callback_data=f"view_dir:{direction.id}"))
     if len(directions) < 5:
         builder.add(InlineKeyboardButton(text="Добавить конкурс", callback_data=f"add_comp:{university_name}"))
-    builder.add(InlineKeyboardButton(text="Назад", callback_data=f"back_menu"))
+    builder.add(InlineKeyboardButton(text="Назад", callback_data=f"start_registration"))
     builder.adjust(1)
     return builder.as_markup()
 
@@ -32,5 +32,12 @@ def get_profile_keyboard():
     builder = InlineKeyboardBuilder()
     builder.add(InlineKeyboardButton(text="Изменить код", callback_data="update_code"))
     builder.add(InlineKeyboardButton(text="Назад", callback_data="start_registration"))
+    builder.adjust(1)
+    return builder.as_markup()
+
+def get_custom_code_choice_keyboard():
+    builder = InlineKeyboardBuilder()
+    builder.add(InlineKeyboardButton(text="Да, указать другой", callback_data="use_custom_code"))
+    builder.add(InlineKeyboardButton(text="Нет, использовать глобальный", callback_data="use_global_code"))
     builder.adjust(1)
     return builder.as_markup()

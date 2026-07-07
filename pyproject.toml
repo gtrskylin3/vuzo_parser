@@ -13,6 +13,7 @@ dependencies = [
     "beautifulsoup4>=4.15.0",
     "loguru>=0.7.3",
     "pydantic-settings>=2.14.2",
+    "pyright>=1.1.411",
     "requests>=2.34.2",
     "sqlalchemy>=2.0.51",
 ]

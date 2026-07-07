@@ -1,6 +1,6 @@
 from typing import Callable, Dict, Any, Awaitable
 from aiogram import BaseMiddleware
-from aiogram.types import TelegramObject
+from aiogram.types import TelegramObject, Message, CallbackQuery
 from loguru import logger
 
 class AccessMiddleware(BaseMiddleware):
@@ -20,9 +20,9 @@ class AccessMiddleware(BaseMiddleware):
         if not user or user.id != self.allowed_id:
             logger.warning(f"Access denied for user {user.id if user else 'Unknown'}")
             # Если можем, отправляем сообщение
-            if hasattr(event, "message") and event.message:
-                await event.message.answer("⛔️ Доступ запрещен.")
-            elif hasattr(event, "answer"):
+            if isinstance(event, Message):
+                await event.answer("⛔️ Доступ запрещен.")
+            elif isinstance(event, CallbackQuery):
                 await event.answer("⛔️ Доступ запрещен.", show_alert=True)
             # И не вызываем следующий хендлер
             return
