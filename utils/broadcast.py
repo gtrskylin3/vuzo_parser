@@ -8,9 +8,6 @@ from format import vuz_stats
 from repository.users import UsersRepository
 from utils.decorators import log_function_call
 
-# Import VUZ_PARSER
-from vuz_parser import VUZ_PARSER
-
 
 @log_function_call
 async def broadcast_users(bot: Bot, user_repo: UsersRepository):
@@ -21,26 +18,17 @@ async def broadcast_users(bot: Bot, user_repo: UsersRepository):
     for user_direction in all_directions:
         chat_id = user_direction.user.tg_id
         
+        # Проверяем, что у направления есть университет
         if not user_direction.direction.university:
             logger.warning(f"Direction with ID {user_direction.direction.id} has no linked university. Skipping.")
             continue
         univer_name = user_direction.direction.university.name
         
-        # Prioritize custom code from direction, fallback to global user code
-        user_code = user_direction.user_code or user_direction.user.user_code
-        if not user_code:
-            logger.warning(f"No user_code for user {chat_id} and direction {user_direction.direction.id}. Skipping.")
-            continue
-
         position = None
         if univer_name == "НГУ":
-            _, position = vuz_stats.format_nsu_answer(user_code, user_direction.direction.url)
+            _, position = vuz_stats.format_nsu_answer(user_direction.user.user_code, user_direction.direction.url)
         elif univer_name == "НГТУ НЭТИ":
-            _, position = vuz_stats.format_nstu_answer(user_code, user_direction.direction.url)
-        elif univer_name == "ТГУ":
-            _, position = vuz_stats.format_tgu_answer(user_code, user_direction.direction.url)
-        elif univer_name == "ТПУ":
-            _, position = vuz_stats.format_tpu_answer(user_code, user_direction.direction.url)
+            _, position = vuz_stats.format_nstu_answer(user_direction.user.user_code, user_direction.direction.url)
         else:
             logger.warning(f"Unknown university '{univer_name}' for direction_id {user_direction.direction.id}. Skipping.")
             continue
@@ -57,13 +45,11 @@ async def broadcast_users(bot: Bot, user_repo: UsersRepository):
             try:
                 await bot.send_message(
                     chat_id=chat_id,
-                    text=(
-                        f"📢 Ваша позиция в конкурсе изменилась:"
-                        f"Конкурс: **{user_direction.direction.name}**"
-                        f"URL: **{user_direction.direction.url}**"
-                        f"Было: {old_position or 'N/A'}"
-                        f"Стало: {position}"
-                    ),
+                    text=("📢 Ваша позиция в конкурсе изменилась:\n"
+                          f"Конкурс: **{user_direction.direction.name}**\n"
+                          f"URL: **{user_direction.direction.url}**\n"
+                          f"Было: {old_position or 'N/A'}\n"
+                          f"Стало: {position}"),
                     parse_mode="Markdown"
                 )
                 user_direction.user_position = int(position)

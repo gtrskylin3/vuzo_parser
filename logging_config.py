@@ -25,4 +25,4 @@ logger.add(
 
 # 4. Перехватываем стандартный logging, чтобы все библиотеки писали в loguru
 # В aiogram и apscheduler этого достаточно для перенаправления их логов
-logger.patch(lambda record: record.update(name=record["name"].split(".")[0] if isinstance(record.get("name"), str) else record.get("name")))
+logger.patch(lambda record: record.update(name=record["name"].split(".")[0]))
