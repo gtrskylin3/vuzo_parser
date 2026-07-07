@@ -24,13 +24,31 @@ class UsersRepository(BaseRepository):
         await self.session.refresh(user)
         return user
     
-    async def get_user_directions_count(self, user_id: int) -> int:
-        query = select(func.count(UserDirections.direction_id)).where(UserDirections.user_id == user_id)
+    async def get_user_directions_count(self, user_id: int, vuz_id : int) -> int:
+        query = (
+            select(func.count(UserDirections.direction_id))
+            .join(
+                UniversitiesDirections,
+                UserDirections.direction_id == UniversitiesDirections.id
+            )
+            .where(
+                UserDirections.user_id == user_id,
+                UniversitiesDirections.university_id == vuz_id
+            )
+        )
         result = await self.session.execute(query)
         return result.scalar() or 0
 
     async def add_direction(self, user_id: int, direction_id: int, position: int):
-        current_count = await self.get_user_directions_count(user_id)
+        vuz_query = select(UniversitiesDirections.university_id).where(
+        UniversitiesDirections.id == direction_id
+        )
+        vuz_result = await self.session.execute(vuz_query)
+        vuz_id = vuz_result.scalar_one_or_none()
+        if not vuz_id:
+            return False, None
+        
+        current_count = await self.get_user_directions_count(user_id, vuz_id)
         query = select(UserDirections).where(
             UserDirections.user_id == user_id, 
             UserDirections.direction_id == direction_id

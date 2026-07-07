@@ -29,6 +29,10 @@ async def broadcast_users(bot: Bot, user_repo: UsersRepository):
             _, position = vuz_stats.format_nsu_answer(user_direction.user.user_code, user_direction.direction.url)
         elif univer_name == "НГТУ НЭТИ":
             _, position = vuz_stats.format_nstu_answer(user_direction.user.user_code, user_direction.direction.url)
+        elif univer_name == "ТГУ":
+            _, position = vuz_stats.format_tgu_answer(user_direction.user.user_code, user_direction.direction.url)
+        elif univer_name == "ТПУ":
+            _, position = vuz_stats.format_tpu_answer(user_direction.user.user_code, user_direction.direction.url)
         else:
             logger.warning(f"Unknown university '{univer_name}' for direction_id {user_direction.direction.id}. Skipping.")
             continue

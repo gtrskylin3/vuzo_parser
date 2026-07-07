@@ -3,7 +3,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_URL = f'sqlite+aiosqlite:///{BASE_DIR}/vuzoparser.db'
-UNIVERSITIES = ["НГУ", "НГТУ НЭТИ", "ТГУ"]
+UNIVERSITIES = ["НГУ", "НГТУ НЭТИ", "ТГУ", "ТПУ"]
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=BASE_DIR/'.env')

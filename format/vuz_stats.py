@@ -41,9 +41,11 @@ def format_nstu_answer(user_code, competition_url):
     result_message = ''
     try:
         nstu_data = VUZ_PARSER.get_NSTU(id=user_code, url=competition_url)
+        print(nstu_data)
         if nstu_data:
-            position, green_position, people_with_consent = nstu_data
+            position, green_position, people_with_consent, free_places = nstu_data
             result_message += (
+                f"Количество бюджетных мест: {free_places}\n"
                 f"Ваша позиция в общем списке НГТУ: {position}\n"
                 f"Ваша позиция в 'зеленом' списке НГТУ: {green_position}\n"
                 f"Человек с согласием (НГТУ): {people_with_consent}\n"
@@ -54,4 +56,60 @@ def format_nstu_answer(user_code, competition_url):
         result_message += f"Произошла ошибка при получении данных для НГТУ: {e}\n"
     if not position:
         position = None
+    return result_message, position
+
+
+def format_tgu_answer(user_code, competition_url):
+    result_message = ''
+    position = None
+    try:
+        tgu_data = VUZ_PARSER.get_TSU(id=user_code, url=competition_url)
+        if tgu_data:
+            total_budget_places, position, people_with_consent_above, konkurs_ball, soglasie, priority, bvi = tgu_data
+            result_message += (
+                f"Ваша статистика в конкурсе ТГУ:\n"
+                f"Всего бюджетных мест: {total_budget_places}\n"
+                f"Ваша позиция: {position}\n"
+                f"Человек с согласием выше: {people_with_consent_above}\n"
+                f"Конкурсный балл: {konkurs_ball}\n"
+                f"Согласие на зачисление: {'Да' if soglasie else 'Нет'}\n"
+                f"Приоритет: {priority}\n"
+                f"БВИ: {'Да' if bvi else 'Нет'}\n"
+            )
+        else:
+            result_message += "Не удалось получить данные для ТГУ по этой ссылке.\n"
+    except (ValueError, KeyError) as e:
+        result_message += f"Ошибка парсинга параметров для ТГУ: {e}. Убедитесь, что ссылка корректна.\n"
+    except Exception as e:
+        result_message += f"Произошла ошибка при получении данных для ТГУ: {e}\n"
+    return result_message, position
+
+
+def format_tpu_answer(user_code, competition_url):
+    result_message = ''
+    position = None
+    try:
+        parsed_url = urlparse(competition_url)
+        query_params = parse_qs(parsed_url.query)
+        competition_id = int(query_params.get('competition_id', ['0'])[0])
+
+        tpu_data = VUZ_PARSER.get_TPU(id=user_code, competition_id=competition_id)
+        if tpu_data:
+            total_budget_places, position, people_with_consent_above, konkurs_ball, soglasie, priority, status = tpu_data
+            result_message += (
+                f"Ваша статистика в конкурсе ТПУ:\n"
+                f"Всего бюджетных мест: {total_budget_places}\n"
+                f"Ваша позиция: {position}\n"
+                f"Человек с согласием выше: {people_with_consent_above}\n"
+                f"Конкурсный балл: {konkurs_ball}\n"
+                f"Согласие на зачисление: {'Да' if soglasie else 'Нет'}\n"
+                f"Приоритет: {priority}\n"
+                f"Статус: {status}\n"
+            )
+        else:
+            result_message += "Не удалось получить данные для ТПУ по этой ссылке.\n"
+    except (ValueError, KeyError) as e:
+        result_message += f"Ошибка парсинга параметров для ТПУ: {e}. Убедитесь, что ссылка корректна и содержит competition_id.\n"
+    except Exception as e:
+        result_message += f"Произошла ошибка при получении данных для ТПУ: {e}\n"
     return result_message, position
