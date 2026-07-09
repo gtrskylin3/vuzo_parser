@@ -1,4 +1,5 @@
 import asyncio
+from html import escape
 from aiogram import Bot
 from aiogram.exceptions import TelegramAPIError
 from sqlalchemy.ext.asyncio import async_sessionmaker
@@ -47,15 +48,20 @@ async def broadcast_users(bot: Bot, user_repo: UsersRepository):
             updates_count += 1
             logger.info(f"Found position change for user {chat_id}: {old_position or 'N/A'} -> {position}")
             try:
+                direction_name = escape(user_direction.direction.name)
+                budget_str = escape(str(budget))
+                url_str = escape(user_direction.direction.url)
+                old_position_str = escape(str(old_position or 'N/A'))
+                position_str = escape(str(position))
                 await bot.send_message(
                     chat_id=chat_id,
-                    text=("📢 Ваша позиция в конкурсе изменилась:\n"
-                          f"Конкурс: **{user_direction.direction.name}**\n"
-                          f"Бюджетных мест: **{budget}**\n"
-                          f"URL: **{user_direction.direction.url}**\n"
-                          f"Было: {old_position or 'N/A'}\n"
-                          f"Стало: {position}"),
-                    parse_mode="Markdown"
+                    text=(f"📢 Ваша позиция в конкурсе изменилась:\n"
+                          f"Конкурс: <b>{direction_name}</b>\n"
+                          f"Бюджетных мест: <b>{budget_str}</b>\n"
+                          f"URL: {url_str}\n"
+                          f"Было: {old_position_str}\n"
+                          f"Стало: {position_str}"),
+                    parse_mode="HTML"
                 )
                 user_direction.user_position = int(position)
                 await asyncio.sleep(0.05)

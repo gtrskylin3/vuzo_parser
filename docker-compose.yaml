@@ -1,0 +1,9 @@
+services:
+  telegram_bot:
+    build: .
+    container_name: vuzoparser_bot
+    restart: unless-stopped
+    env_file:
+      -  .env
+    volumes:
+      - .:/app
