@@ -34,7 +34,7 @@ def format_nsu_answer(user_code, competition_url):
         result_message += f"Ошибка парсинга параметров для НГУ: {e}. Убедитесь, что ссылка корректна.\n"
     except Exception as e:
         result_message += f"Произошла ошибка при получении данных для НГУ: {e}\n"
-    return result_message, position
+    return result_message, position, total_places
 
 
 def format_nstu_answer(user_code, competition_url):
@@ -56,7 +56,7 @@ def format_nstu_answer(user_code, competition_url):
         result_message += f"Произошла ошибка при получении данных для НГТУ: {e}\n"
     if not position:
         position = None
-    return result_message, position
+    return result_message, position, free_places
 
 
 def format_tgu_answer(user_code, competition_url):
@@ -82,7 +82,7 @@ def format_tgu_answer(user_code, competition_url):
         result_message += f"Ошибка парсинга параметров для ТГУ: {e}. Убедитесь, что ссылка корректна.\n"
     except Exception as e:
         result_message += f"Произошла ошибка при получении данных для ТГУ: {e}\n"
-    return result_message, position
+    return result_message, position, total_budget_places
 
 
 def format_tpu_answer(user_code, competition_url):
@@ -112,4 +112,4 @@ def format_tpu_answer(user_code, competition_url):
         result_message += f"Ошибка парсинга параметров для ТПУ: {e}. Убедитесь, что ссылка корректна и содержит competition_id.\n"
     except Exception as e:
         result_message += f"Произошла ошибка при получении данных для ТПУ: {e}\n"
-    return result_message, position
+    return result_message, position, total_budget_places

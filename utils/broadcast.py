@@ -26,13 +26,13 @@ async def broadcast_users(bot: Bot, user_repo: UsersRepository):
         
         position = None
         if univer_name == "НГУ":
-            _, position = vuz_stats.format_nsu_answer(user_direction.user.user_code, user_direction.direction.url)
+            _, budget, position = vuz_stats.format_nsu_answer(user_direction.user.user_code, user_direction.direction.url)
         elif univer_name == "НГТУ НЭТИ":
-            _, position = vuz_stats.format_nstu_answer(user_direction.user.user_code, user_direction.direction.url)
+            _, budget,  position = vuz_stats.format_nstu_answer(user_direction.user.user_code, user_direction.direction.url)
         elif univer_name == "ТГУ":
-            _, position = vuz_stats.format_tgu_answer(user_direction.user.user_code, user_direction.direction.url)
+            _, budget,  position = vuz_stats.format_tgu_answer(user_direction.user.user_code, user_direction.direction.url)
         elif univer_name == "ТПУ":
-            _, position = vuz_stats.format_tpu_answer(user_direction.user.user_code, user_direction.direction.url)
+            _, budget, position = vuz_stats.format_tpu_answer(user_direction.user.user_code, user_direction.direction.url)
         else:
             logger.warning(f"Unknown university '{univer_name}' for direction_id {user_direction.direction.id}. Skipping.")
             continue
@@ -51,6 +51,7 @@ async def broadcast_users(bot: Bot, user_repo: UsersRepository):
                     chat_id=chat_id,
                     text=("📢 Ваша позиция в конкурсе изменилась:\n"
                           f"Конкурс: **{user_direction.direction.name}**\n"
+                          f"Бюджетных мест: **{budget}**\n"
                           f"URL: **{user_direction.direction.url}**\n"
                           f"Было: {old_position or 'N/A'}\n"
                           f"Стало: {position}"),

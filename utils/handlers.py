@@ -45,13 +45,13 @@ async def update_and_respond_direction(
 
     # 3. Запуск парсера
     if selected_university == "НГУ":
-        result_message, position = vuz_stats.format_nsu_answer(user_code, direction_url)
+        result_message, budget, position = vuz_stats.format_nsu_answer(user_code, direction_url)
     elif selected_university == "НГТУ НЭТИ":
-        result_message, position = vuz_stats.format_nstu_answer(user_code, direction_url)
+        result_message, budget, position = vuz_stats.format_nstu_answer(user_code, direction_url)
     elif selected_university == "ТГУ":
-        result_message, position = vuz_stats.format_tgu_answer(user_code, direction_url)
+        result_message, budget, position = vuz_stats.format_tgu_answer(user_code, direction_url)
     elif selected_university == "ТПУ":
-        result_message, position = vuz_stats.format_tpu_answer(user_code, direction_url)
+        result_message, budget, position = vuz_stats.format_tpu_answer(user_code, direction_url)
     else:
         await get_error(target_msg, state)
         return
