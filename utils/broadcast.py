@@ -75,8 +75,19 @@ async def broadcast_users(bot: Bot, user_repo: UsersRepository):
     
     logger.success(f"Finished background check. Total updates found: {updates_count}.")
 
+def run_sync_broadcast(user_repo: UsersRepository, bot: Bot):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    
+    try:
+        loop.run_until_complete(broadcast_users(bot=bot, user_repo=user_repo))
+    finally:
+        loop.close()
+
+
 
 async def broadcast_users_job(bot: Bot, session_pool: async_sessionmaker):
     async with session_pool() as session:
         user_repo = UsersRepository(session)
-        await broadcast_users(bot=bot, user_repo=user_repo)
+        current_loop = asyncio.get_running_loop()
+        await current_loop.run_in_executor(None, run_sync_broadcast, user_repo, bot)
