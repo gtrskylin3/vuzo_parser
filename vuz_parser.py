@@ -79,7 +79,6 @@ class VUZ_PARSER:
         try:
             response = session.get(url, timeout=10)
             response.raise_for_status()
-            print(f"Response text (first 500 chars): {response.text[:500]}")
         except requests.RequestException as e:
             print(f"Request failed or timed out: {e}")
             return None
