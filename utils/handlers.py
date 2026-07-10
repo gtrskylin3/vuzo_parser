@@ -89,10 +89,14 @@ async def update_and_respond_direction(
              f"Стало: {position}"), 
              parse_mode="Markdown"
         )
-    # 5. Возврат к меню
-    await target_msg.answer(
-        "✅ Направление *добавлено* в отслеживание! Выберите ВУЗ:", parse_mode="Markdown", reply_markup=get_universities_keyboard(UNIVERSITIES)
-    )
+    if not old_position:
+        await target_msg.answer(
+            "✅ Направление *добавлено* в отслеживание! Выберите ВУЗ:", parse_mode="Markdown", reply_markup=get_universities_keyboard(UNIVERSITIES)
+        )
+    else:
+        await target_msg.answer(
+            "🎓 Выберите ВУЗ:", parse_mode="Markdown", reply_markup=get_universities_keyboard(UNIVERSITIES)
+        )
     await state.set_state(Form.waiting_for_university)
 
 

@@ -7,3 +7,4 @@ services:
       -  .env
     volumes:
       - .:/app
+    command: sh -c "uv run alembic upgrade head && uv run main.py"
