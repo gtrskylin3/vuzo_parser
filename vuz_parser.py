@@ -117,7 +117,7 @@ class VUZ_PARSER:
             if consert:
                 people_with_consent_above += 1
         else:
-            return None
+            return (None, None, 0, 0)
         
         green_list_link = None
         green_anchor = soup.find(
